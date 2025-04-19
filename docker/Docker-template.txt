@@ -1,0 +1,28 @@
+Use this template to create your docker container.
+
+# Dockerfile
+FROM ubuntu:24.04
+
+# Set environment variable to make non-interactive installs
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install required packages
+RUN apt-get update && apt-get install -y \
+    curl \
+    ca-certificates \
+    gnupg \
+    lsb-release \
+    sudo \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a new user 'username' (change 'username' as needed)
+RUN useradd -m -s /bin/bash usename \
+    && echo "usename:password" | chpasswd \
+    && adduser usename sudo \
+    && echo "usename ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/usename
+
+# Set the default user to 'username'
+USER usename
+
+# Start the container with bash
+CMD [ "bash" ]
