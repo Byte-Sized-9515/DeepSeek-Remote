@@ -2,7 +2,7 @@
 Dockerfile
 
 # Notes & Info Verbose
-LiveDoc
+LiveDoc.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
