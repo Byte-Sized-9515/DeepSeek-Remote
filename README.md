@@ -29,4 +29,4 @@ I am useing DeepSeek-R1:14b in server.py. Change this to the actual LLM you want
 
 This URL will be available for a long as the cloudflared tunnel is running. If you stop the tunnel and start another one, a new URL will be generated. For the best anytime anywhere remote experience consider using a capable PC that can be left on 24/7.
 
-<h2>PLEASE BE AWARE OF CLOUDFALRES [TERMS AND CONDITIONS](https://www.cloudflare.com/website-terms/#:~:text=You%20may%20not%20use%20the,any%20Websites%20or%20Online%20Services.) BEFORE INSTALLING THIS PROJECT</h2>
+<h2>PLEASE BE AWARE OF CLOUDFLARES <a href="https://www.cloudflare.com/website-terms/#:~:text=You%20may%20not%20use%20the,any%20Websites%20or%20Online%20Services">TERMS AND CONDITIONS</a> BEFORE INSTALLING THIS PROJECT</h2>
