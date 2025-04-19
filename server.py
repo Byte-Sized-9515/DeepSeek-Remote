@@ -92,4 +92,4 @@ def process():
         return jsonify({"response": f"Error: {str(e)}"}), 500
 
 if __name__ == '__main__':
-    app.run(port=1198)
+    app.run(port=1194)
