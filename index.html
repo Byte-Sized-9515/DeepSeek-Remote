@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+     <html lang="en">
+     <head>
+         <meta charset="UTF-8">
+         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+         <title>DeepSeek AI Interface</title>
+         <style>
+             body {
+                 font-family: Arial, sans-serif;
+                 max-width: 800px;
+                 margin: 0 auto;
+                 padding: 20px;
+                 background-color: #f5f5f5;
+             }
+             
+             .container {
+                 background-color: white;
+                 padding: 20px;
+                 border-radius: 8px;
+                 box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+             }
+
+             h1 {
+                 color: #333;
+             }
+
+             .input-group {
+                 margin-bottom: 15px;
+             }
+
+             input[type="text"] {
+                 width: 70%;
+                 padding: 8px;
+                 font-size: 16px;
+                 border: 1px solid #ddd;
+                 border-radius: 4px;
+             }
+
+             button {
+                 background-color: #4CAF50;
+                 color: white;
+                 padding: 10px 20px;
+                 border: none;
+                 border-radius: 4px;
+                 cursor: pointer;
+                 font-size: 16px;
+             }
+
+             button:hover {
+                 background-color: #45a049;
+             }
+
+             #response {
+                 margin-top: 20px;
+                 padding: 15px;
+                 background-color: #f8f9fa;
+                 border-radius: 4px;
+                 white-space: pre-wrap;
+             }
+         </style>
+     </head>
+     <body>
+         <div class="container">
+             <h1>DeepSeek AI Interface</h1>
+             
+             <div class="input-group">
+                 <input type="text" id="promptInput" placeholder="Enter your prompt...">
+             </div>
+             
+             <button onclick="generateResponse()" style="margin-right: 10px;">Chat Mode</button>
+             <button onclick="generateCode()">Code Mode</button>
+
+             <div id="response"></div>
+         </div>
+
+         <script>
+             function generateResponse() {
+                 const prompt = document.getElementById('promptInput').value;
+                 if (!prompt) return;
+
+                 fetch('/process', {
+                     method: 'POST',
+                     headers: {
+                         'Content-Type': 'application/json'
+                     },
+                     body: JSON.stringify({ prompt, mode: 'chat' })
+                 })
+                 .then(response => response.text())
+                 .then(text => {
+                     document.getElementById('response').textContent = text;
+                 });
+             }
+
+             function generateCode() {
+                 const prompt = document.getElementById('promptInput').value;
+                 if (!prompt) return;
+
+                 fetch('/process', {
+                     method: 'POST',
+                     headers: {
+                         'Content-Type': 'application/json'
+                     },
+                     body: JSON.stringify({ prompt, mode: 'code' })
+                 })
+                 .then(response => response.text())
+                 .then(text => {
+                     document.getElementById('response').textContent = text;
+                 });
+             }
+
+             document.addEventListener('keypress', function(e) {
+                 if (e.key === 'Enter') {
+                     generateResponse();
+                 }
+             });
+         </script>
+     </body>
+     </html>
