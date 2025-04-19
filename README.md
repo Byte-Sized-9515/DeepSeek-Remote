@@ -12,7 +12,7 @@
 
  - Start a cloudflared tunnel to any port >1024. I will be using 1194
    - `cloudflared tunnel --url localhost:1198`
-     - Save the generated URL
+   - Save the generated URL
 
        +--------------------------------------------------------------------------------------------+
 
@@ -22,6 +22,6 @@
 
        +--------------------------------------------------------------------------------------------+
        
- - start server.py
+ - Start `server.py`
 
  - Open your URL from ANYWHERE without exposing your IP!!!
