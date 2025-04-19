@@ -12,7 +12,7 @@
 I am useing DeepSeek-R1:14b in server.py. Change this to the actual LLM you want to access remotely. To see your installed LLMs in Ollama run `ollama list`.
 
  - Start a cloudflared tunnel to any port >1024. I will be using 1194
-   - `cloudflared tunnel --url localhost:1198`
+   - `cloudflared tunnel --url localhost:1194`
    - Save the generated URL
 
        +--------------------------------------------------------------------------------------------+
