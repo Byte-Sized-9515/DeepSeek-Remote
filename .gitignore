@@ -1,6 +1,9 @@
 # Senstive Info
 Dockerfile
 
+# Notes & Info Verbose
+LiveDoc
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
