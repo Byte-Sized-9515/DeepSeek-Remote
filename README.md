@@ -22,4 +22,4 @@ I am useing DeepSeek-R1:14b in server.py. Change this to the actual LLM you want
 
 I am running a private Cloudflare tunnel. Private tunnels are assigned random URLs at start.
 
-<h2>PLEASE BE AWARE OF CLOUDFLARES <a href="https://www.cloudflare.com/website-terms/#:~:text=You%20may%20not%20use%20the,any%20Websites%20or%20Online%20Services">TERMS AND CONDITIONS</a> BEFORE INSTALLING THIS PROJECT</h2>
+<h2>PLEASE BE AWARE OF CLOUDFLARES <a href="https://www.cloudflare.com/website-terms/#:~:text=You%20may%20not%20use%20the,any%20Websites%20or%20Online%20Services">TERMS AND CONDITIONS</a> BEFORE CLONING THIS PROJECT</h2>
