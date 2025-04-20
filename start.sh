@@ -4,7 +4,7 @@ echo "Starting Cloudflare tunnel..."
 cloudflared tunnel --url localhost:1194 &
 CLOUDFLARED_PID=$!
 
-sleep 2
+sleep 6
 
 echo "Activate virtual environment..."
 source venv/bin/activate
