@@ -13,11 +13,9 @@ I am useing DeepSeek-R1:14b in server.py. Change this to the actual LLM you want
 
  - Navigate to the project and run ./start.sh
 
- -
-    +--------------------------------------------------------------------------------------------+
-    |  Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):  |
-    |  https://afghanistan-apparently-editor-concerned.trycloudflare.com                         |
-    +--------------------------------------------------------------------------------------------+
+ - Save the generated URL. This is how you will access GUI
+   Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):
+   https://afghanistan-apparently-editor-concerned.trycloudflare.com
 
  - Open your URL from ANYWHERE without exposing your IP!!!
 
