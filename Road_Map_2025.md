@@ -4,11 +4,11 @@
 
 <h1>In Progress</h1>
 
+- Migrate to FastAPI and ASGI
+
 <h1>Planned</h1>
 
 <h1>On The Board</h1>
-
-- Change server software
 
 - Session storage
 
