@@ -1,10 +1,17 @@
 import threading
 import time
 import logging
-from flask import Flask, request, jsonify, render_template
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 import ollama
 
-app = Flask(__name__)
+app = FastAPI()
+
+# Mount static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="static")
 
 # Enable logging for debugging
 logging.basicConfig(level=logging.DEBUG)
@@ -13,9 +20,9 @@ logging.basicConfig(level=logging.DEBUG)
 current_process_thread = None
 abort_flag = False
 
-@app.route('/')
-def index():
-    return render_template('chat-mobile.html')
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    return templates.TemplateResponse("chat-mobile.html", {"request": request})
 
 # Define the method to run the LLM inference
 def run_inference(prompt, mode, result_holder, process_id):
@@ -49,9 +56,9 @@ def run_inference(prompt, mode, result_holder, process_id):
         abort_flag = False  # Reset abort flag
 
 # Handle the POST request to process the chat
-@app.route('/process', methods=['POST'])
-def process():
-    data = request.json
+@app.post("/process")
+async def process(request: Request):
+    data = await request.json()
     prompt = data['prompt']
     mode = data.get('mode', 'chat')
 
@@ -70,16 +77,18 @@ def process():
     # If the process is still running after the timeout
     if t.is_alive():
         logging.warning("Processing timeout reached for prompt: %s", prompt)
-        return jsonify({"response": "Server took too long to respond."}), 504
+        raise HTTPException(status_code=504, detail="Server took too long to respond.")
+    
     if 'error' in result_holder:
         logging.error("Error result during processing: %s", result_holder['error'])
-        return jsonify({"response": f"Error: {result_holder['error']}"}), 500
+        raise HTTPException(status_code=500, detail=f"Error: {result_holder['error']}")
+    
     logging.debug("Processing finished successfully.")
-    return jsonify({"response": result_holder['response']})
+    return JSONResponse(content={"response": result_holder['response']})
 
 # Handle server-side refresh (abort request when needed)
-@app.route('/refresh', methods=['POST'])
-def refresh():
+@app.post("/refresh")
+async def refresh():
     global abort_flag
     global current_process_thread
 
@@ -87,10 +96,7 @@ def refresh():
         # Trigger the abort flag to stop the ongoing process
         abort_flag = True
         logging.debug("Aborting the ongoing process.")
-        return jsonify({"response": "Server-side task aborted."}), 200
+        return JSONResponse(content={"response": "Server-side task aborted."})
     else:
         logging.debug("No process to abort.")
-        return jsonify({"response": "No process to abort."}), 200
-
-if __name__ == '__main__':
-    app.run(port=1194)
+        return JSONResponse(content={"response": "No process to abort."})
