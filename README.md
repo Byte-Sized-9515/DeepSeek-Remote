@@ -1,24 +1,43 @@
-<h1>Dependencies</h1>
+<h1>How To Install</h1>
 
-- [Cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/)
+The install process for these dpenedencies may vary depending on your OS and other factors. Please see the linked documentation to correctly install dependencies.
 
-- [Ollama](https://ollama.com/download) and an LLM of your choosing
- 
-- Python 3.10+
- 
-- Flask
+- Install [Cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/)
 
-<h1>Setup Process</h1>
-I am useing DeepSeek-R1:14b in server.py. Change this to the actual LLM you want to access remotely. To see your installed LLMs in Ollama run `ollama list`.
+- Install [miniconda](https://www.anaconda.com/docs/getting-started/miniconda/install)
 
- - Navigate to the project and run ./start.sh
+- Clone the repo `git clone https://github.com/Byte-Sized-9515/DeepSeek-Remote.git`
 
- - Save the generated URL. This is how you will access GUI
-   Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):
-   https://afghanistan-apparently-editor-concerned.trycloudflare.com
+- Open your local repo directory and create a conda environment: `conda create -n <condaEnv> python=3.12.3 -y`
 
- - Open your URL from ANYWHERE without exposing your IP!!!
+- Activate your conda env: `conda activate <condaEnv>`
 
-I am running a private Cloudflare tunnel. Private tunnels are assigned random URLs at start.
+- Install conda dependencies: `conda install -c conda-forge fastapi uvicorn jinja2 -y`
 
-<h2>PLEASE BE AWARE OF CLOUDFLARES <a href="https://www.cloudflare.com/website-terms/#:~:text=You%20may%20not%20use%20the,any%20Websites%20or%20Online%20Services">TERMS AND CONDITIONS</a> BEFORE CLONING THIS PROJECT</h2>
+- Install python dependencies: `pip install ollama python-multipart`
+
+- In `main.py` change the model on line 43 to the model you want to use:
+
+```response = ollama.chat(
+    model='<your-ollama-model>',
+    messages=[{
+        "role": "user",
+        "content": f"{mode} mode: {prompt}"
+    }]
+```
+
+<h1>Starting The AI Server</h1>
+
+- Open your repo directory and run `./start.sh`
+
+<h1>Hardware Specs</h1>
+
+I am running the DeepSeek-r1:14b model on the below hardware. It's not fast, but it's not unsuably slow:
+
+- CPU: 13th Gen Intel i7-13700KF
+
+- GPU: GeForce RTX 4070
+
+- RAM: 16GB DDR5 x2
+
+<h3>PLEASE BE AWARE OF CLOUDFLARES <a href="https://www.cloudflare.com/website-terms/#:~:text=You%20may%20not%20use%20the,any%20Websites%20or%20Online%20Services">TERMS AND CONDITIONS</a> BEFORE CLONING THIS PROJECT</h3>

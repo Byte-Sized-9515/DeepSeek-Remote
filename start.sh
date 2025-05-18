@@ -1,16 +1,16 @@
 #!/bin/bash
 
 echo "Starting Cloudflare tunnel..."
-cloudflared tunnel --url localhost:1194 &
+cloudflared tunnel --url localhost:8000 &
 CLOUDFLARED_PID=$!
 
 sleep 6
 
 echo "Activate virtual environment..."
-source venv/bin/activate
+conda activate web-ai
 
-echo "Starting Flask server..."
-python3 server.py
+echo "Starting FastAPI server with Uvicorn..."
+uvicorn main:app --host 0.0.0.0 --port 8000
 
-# When Flask server exits, kill cloudflared
+# When FastAPI server exits, kill cloudflared
 kill $CLOUDFLARED_PID
