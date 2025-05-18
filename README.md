@@ -1,24 +1,20 @@
-<h1>Dependencies</h1>
+<h1>How to Install</h1>
 
-- [Cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/)
+- Install [miniconda3](https://www.anaconda.com/docs/getting-started/miniconda/install). (see documentation for installation instructions)
 
-- [Ollama](https://ollama.com/download) and an LLM of your choosing
- 
-- Python 3.10+
- 
-- Flask
+- Install [Cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/). (step may vary, see documentation).
 
-<h1>Setup Process</h1>
-I am useing DeepSeek-R1:14b in server.py. Change this to the actual LLM you want to access remotely. To see your installed LLMs in Ollama run `ollama list`.
+- Clone the repo: `git clone https://github.com/Byte-Sized-9515/DeepSeek-Remote.git`
 
- - Navigate to the project and run ./start.sh
+- Go into your local repo and create a conda environment: `conda create -n <Env_Name> python=3.12.3`
 
- - Save the generated URL. This is how you will access GUI
-   Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):
-   https://afghanistan-apparently-editor-concerned.trycloudflare.com
+- Install Ollama and Flask: `pip install ollama flask`
 
- - Open your URL from ANYWHERE without exposing your IP!!!
+<h1>Starting Your AI Server</h1>
 
-I am running a private Cloudflare tunnel. Private tunnels are assigned random URLs at start.
+- Run `./start.sh`
 
-<h2>PLEASE BE AWARE OF CLOUDFLARES <a href="https://www.cloudflare.com/website-terms/#:~:text=You%20may%20not%20use%20the,any%20Websites%20or%20Online%20Services">TERMS AND CONDITIONS</a> BEFORE CLONING THIS PROJECT</h2>
+- Open the Cloudflare URL from <b>ANYWHERE</b>
+
+    - Example URL output `Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):
+       https://gary-domain-solving-trademark.trycloudflare.com`
