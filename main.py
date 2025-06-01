@@ -1,10 +1,11 @@
-import threading
-import time
 import logging
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import JSONResponse, HTMLResponse
+import json
+import asyncio
+from fastapi import FastAPI, Request, HTTPException, Header
+from fastapi.responses import JSONResponse, HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from user_agents import parse # pip install pyyaml ua-parser user-agents
 import ollama
 
 app = FastAPI()
@@ -16,87 +17,50 @@ templates = Jinja2Templates(directory="static")
 # Enable logging for debugging
 logging.basicConfig(level=logging.DEBUG)
 
-# Global variables to track the current process
-current_process_thread = None
-abort_flag = False
-
-@app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
-    return templates.TemplateResponse("chat-mobile.html", {"request": request})
-
-# Define the method to run the LLM inference
-def run_inference(prompt, mode, result_holder, process_id):
-    global abort_flag
+@app.get("/")
+async def serve_correct_interface(request: Request, user_agent: str = Header(None)):
     try:
-        # Track the current process
-        global current_process_thread
-        current_process_thread = threading.current_thread()  # Track the thread
-
-        logging.debug("Running inference for prompt: %s", prompt)
-
-        # If the abort flag is set, cancel the task
-        if abort_flag:
-            result_holder['response'] = "Process was aborted by the user."
-            return
-
-        response = ollama.chat(
-            model='deepseek-r1:14b',
-            messages=[{
-                "role": "user",
-                "content": f"{mode} mode: {prompt}"
-            }]
-        )
-        result_holder['response'] = response['message']['content']
-        logging.debug("Inference response: %s", result_holder['response'])
+        ua = parse(user_agent or "")
+        template = "chat-mobile.html" if ua.is_mobile else "chat.html"
+        return templates.TemplateResponse(template, {"request": request})
     except Exception as e:
-        logging.error("Error during inference: %s", str(e))
-        result_holder['error'] = str(e)
-    finally:
-        current_process_thread = None  # Reset after processing is complete
-        abort_flag = False  # Reset abort flag
+        # Fallback to desktop if detection fails
+        logging.error(f"User agent parsing failed: {str(e)}")
+        return templates.TemplateResponse("chat.html", {"request": request})
 
-# Handle the POST request to process the chat
+# Handle the POST request to process the chat with streaming
 @app.post("/process")
 async def process(request: Request):
     data = await request.json()
     prompt = data['prompt']
     mode = data.get('mode', 'chat')
 
-    result_holder = {}
-    process_id = str(time.time())  # Unique process ID (e.g., timestamp)
-    
-    logging.debug("Starting processing for prompt: %s", prompt)
-    
-    # Create a new thread to run the LLM task
-    t = threading.Thread(target=run_inference, args=(prompt, mode, result_holder, process_id))
-    t.start()
-    
-    # Set a longer timeout (e.g., 30 seconds instead of 15)
-    t.join(timeout=30)  # Timeout after 30 seconds
+    async def generate():
+        try:
+            # Get the sync generator first
+            sync_generator = ollama.chat(
+                model='deepseek-r1:14b',
+                messages=[{
+                    "role": "user",
+                    "content": f"{mode} mode: {prompt}"
+                }],
+                stream=True
+            )
+            
+            # Convert sync generator to async
+            for chunk in sync_generator:
+                yield f"data: {json.dumps({'response': chunk['message']['content']})}\n\n"
+                await asyncio.sleep(0)  # Yield control to event loop
+                
+        except Exception as e:
+            logging.error(f"Streaming error: {str(e)}")
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
 
-    # If the process is still running after the timeout
-    if t.is_alive():
-        logging.warning("Processing timeout reached for prompt: %s", prompt)
-        raise HTTPException(status_code=504, detail="Server took too long to respond.")
-    
-    if 'error' in result_holder:
-        logging.error("Error result during processing: %s", result_holder['error'])
-        raise HTTPException(status_code=500, detail=f"Error: {result_holder['error']}")
-    
-    logging.debug("Processing finished successfully.")
-    return JSONResponse(content={"response": result_holder['response']})
+    return StreamingResponse(generate(), media_type="text/event-stream")
 
-# Handle server-side refresh (abort request when needed)
+# Optional: Keep refresh endpoint if you want to implement some cleanup
 @app.post("/refresh")
 async def refresh():
-    global abort_flag
-    global current_process_thread
-
-    if current_process_thread is not None:
-        # Trigger the abort flag to stop the ongoing process
-        abort_flag = True
-        logging.debug("Aborting the ongoing process.")
-        return JSONResponse(content={"response": "Server-side task aborted."})
-    else:
-        logging.debug("No process to abort.")
-        return JSONResponse(content={"response": "No process to abort."})
+    # This endpoint could be used for any necessary cleanup
+    logging.debug("Refresh request received")
+    return JSONResponse(content={"response": "Server refreshed."})

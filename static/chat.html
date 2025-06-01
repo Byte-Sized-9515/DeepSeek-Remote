@@ -15,6 +15,9 @@
 </head>
 <body>
   <h2>Ollama Chat</h2>
+  <div style="background: red; color: white; text-align: center; padding: 5px; font-weight: bold;">
+  DESKTOP INTERFACE - DEVELOPMENT PREVIEW
+</div>
   <div id="chat-box"></div>
   <input type="text" id="prompt" placeholder="Ask a question..." />
   <button id="send-btn">Send</button>
@@ -24,20 +27,28 @@
     const promptInput = document.getElementById('prompt');
     const sendBtn = document.getElementById('send-btn');
 
+    // Append a message to the chat
     function appendMessage(sender, text) {
       const messageDiv = document.createElement('div');
       messageDiv.className = 'message ' + sender;
       messageDiv.textContent = `${sender === 'user' ? 'You' : 'Ollama'}: ${text}`;
       chatBox.appendChild(messageDiv);
       chatBox.scrollTop = chatBox.scrollHeight;
+      return messageDiv; // Return reference for streaming updates
     }
 
+    // Handle sending messages with streaming
     sendBtn.addEventListener('click', async () => {
       const prompt = promptInput.value.trim();
       if (!prompt) return;
 
+      // Display user message immediately
       appendMessage('user', prompt);
       promptInput.value = '';
+
+      // Create a placeholder for the bot's streaming response
+      const botMessageDiv = appendMessage('bot', '▌'); // Typing indicator
+      let botMessageContent = '';
 
       try {
         const response = await fetch('/process', {
@@ -46,14 +57,39 @@
           body: JSON.stringify({ prompt })
         });
 
-        const data = await response.json();
-        appendMessage('bot', data.response);
+        if (!response.ok) throw new Error(`Server error: ${response.status}`);
+        if (!response.body) throw new Error('No response body');
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        // Process streaming chunks
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n').filter(line => line.trim() !== '');
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = JSON.parse(line.substring(6));
+              if (data.error) throw new Error(data.error);
+              
+              // Append new content incrementally
+              botMessageContent += data.response;
+              botMessageDiv.textContent = 'Ollama: ' + botMessageContent;
+              chatBox.scrollTop = chatBox.scrollHeight;
+            }
+          }
+        }
       } catch (error) {
-        appendMessage('bot', 'Error contacting the server.');
-        console.error(error);
+        botMessageDiv.textContent = 'Ollama: Error - ' + error.message;
+        console.error('Error:', error);
       }
     });
 
+    // Send message on Enter key
     promptInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') sendBtn.click();
     });
