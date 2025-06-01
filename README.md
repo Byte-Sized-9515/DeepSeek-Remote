@@ -12,7 +12,9 @@ The install process for these dpenedencies may vary depending on your OS and oth
 
 - Activate your conda env: `conda activate <condaEnv>`
 
-- Install conda dependencies: `conda install -c conda-forge fastapi uvicorn jinja2 -y`
+- Install conda dependencies: `conda install -c conda-forge cudatoolkit=12.4 fastapi uvicorn jinja2 -y`
+  
+  - The verison of CUDA you can install is [dependent on the Nvidia GPU](https://developer.nvidia.com/cuda-gpus) you have. 
 
 - Install python dependencies: `pip install ollama python-multipart`
 
