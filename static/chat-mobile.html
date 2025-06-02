@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <div style="background: blue; color: white; text-align: center; padding: 5px; font-weight: bold;">
+  MOBILE INTERFACE - DEVELOPMENT PREVIEW
+</div>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ollama Chat</title>
@@ -104,35 +107,54 @@
       messageDiv.textContent = (sender === 'user' ? 'You: ' : 'Ollama: ') + text;
       chatBox.appendChild(messageDiv);
       chatBox.scrollTop = chatBox.scrollHeight;
+      return messageDiv; // return reference for streaming updates
     }
 
     sendBtn.addEventListener('click', async () => {
       const prompt = promptInput.value.trim();
       if (!prompt) return;
 
-      appendMessage('user', prompt);
-      promptInput.value = '';
-      promptInput.focus();
-
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+      const botMessageDiv = appendMessage('bot','▌');
+      let botMessageContent = '';
 
       try {
         const response = await fetch('/process', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt }),
-          signal: controller.signal
         });
 
-        clearTimeout(timeout);
+        if (!response.ok) throw new Error(`Server error: ${response.status}`);
+        if (!response.body) throw new Error('No response body');
 
-        const data = await response.json();
-        appendMessage('bot', data.response);
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let partialData = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          partialData += decoder.decode(value, { stream: true});
+
+          const lines = partialData.split('\n');
+          partialData = lines.pop() || ''; // Keep incomplete line for next chunk
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = JSON.parse(line.substring(6));
+              if (data.error) throw new Error(data.error);
+              
+              // Append new content incrementally
+              botMessageContent += data.response;
+              botMessageDiv.textContent = 'Ollama: ' + botMessageContent;
+              chatBox.scrollTop = chatBox.scrollHeight;
+            }
+          }
+        }
       } catch (error) {
-        clearTimeout(timeout);
-        appendMessage('bot', 'Timeout or error contacting server.');
-        console.error('Fetch failed:', error);
+        botMessageDiv.textContent = 'Ollama: Error - ' + error.message;
+        console.error('Error:', error);
       }
     });
 

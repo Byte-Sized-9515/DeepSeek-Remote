@@ -6,9 +6,6 @@ CLOUDFLARED_PID=$!
 
 sleep 6
 
-echo "Activate virtual environment..."
-conda activate web-ai
-
 echo "Starting FastAPI server with Uvicorn..."
 uvicorn main:app --host 0.0.0.0 --port 8000
 
